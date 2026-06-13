@@ -87,12 +87,8 @@ rodar(Tab, Jogador, NovoTab) :-
     write('Digite sua jogada no formato:  Linha, Coluna.'), nl,
     write('(ou -1, -1. para sair)'), nl,
     write('> '),
-    ler_jogada(Jogada),
+    read(Jogada),
     processar_jogada(Jogada, Tab, Jogador, NovoTab).
-
-ler_jogada(Jogada) :-
-    catch(read(Termo), error(syntax_error(_), _), Termo = entrada_invalida),
-    ( var(Termo) -> Jogada = entrada_invalida ; Jogada = Termo ).
 
 processar_jogada(((-1), (-1)), _Tab, _Jogador, _NovoTab) :-
     !,
@@ -104,7 +100,6 @@ processar_jogada((Linha, Coluna), Tab, Jogador, NovoTab) :-
     integer(Linha), integer(Coluna),
     jogar(Linha, Coluna, Tab, Jogador, TabTemp),
     !,
-    exibir_tabuleiro(TabTemp),
     ( vencedor(TabTemp, Jogador) ->
         nome_jogador(Jogador, NomeVenc),
         write('=================================================='), nl,
