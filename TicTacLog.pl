@@ -158,6 +158,7 @@ processar_jogada((L, C), _Tab, _Jogador, _NovoTab) :-
     write('  Jogo finalizado pelo jogador. Ate a proxima!'), nl,
     write('=================================================='), nl, nl.
 
+% 2. Jogada valida (deve ser inteiro e a posicao deve estar livre)
 processar_jogada((Linha, Coluna), Tab, Jogador, NovoTab) :-
     integer(Linha), integer(Coluna),
     jogar(Linha, Coluna, Tab, Jogador, TabTemp),
@@ -180,6 +181,8 @@ processar_jogada((Linha, Coluna), Tab, Jogador, NovoTab) :-
         rodar(TabTemp, Proximo, NovoTab)
     ).
 
+% 3. Jogada invalida (so inteiros, mas a posicao ocupada ou fora do
+% tabuleiro)
 processar_jogada((Linha, Coluna), Tab, Jogador, NovoTab) :-
     integer(Linha), integer(Coluna),
     !,
@@ -189,9 +192,11 @@ processar_jogada((Linha, Coluna), Tab, Jogador, NovoTab) :-
     write('--------------------------------------------------'), nl,
     rodar(Tab, Jogador, NovoTab).
 
+% 4. Entrada invalida generica (qualquer coisa que nao seja o par de
+% inteiros (L, C))
 processar_jogada(_, Tab, Jogador, NovoTab) :-
     write('--------------------------------------------------'), nl,
     write('  Entrada invalida! Use o formato: Linha, Coluna.'), nl,
-    write('  Exemplo: A, B.'), nl,
+    write('  Exemplo: 1, 2.'), nl,
     write('--------------------------------------------------'), nl,
     rodar(Tab, Jogador, NovoTab).
