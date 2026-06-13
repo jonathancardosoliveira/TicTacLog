@@ -1,5 +1,5 @@
 % ==================================================
-%           TABULEIRO E CONFIGURAÇÕES INICIAIS
+%           TABULEIRO E CONFIGURACOES INICIAIS
 % ==================================================
 :- dynamic modo_jogo/1. % Permite que o modo de jogo seja definido em tempo de execucao
 
@@ -27,7 +27,7 @@ proximo_jogador(1, 2).
 proximo_jogador(2, 1).
 
 % ==================================================
-%           LÓGICA DO JOGO (REGRAS)
+%           LOGICA DO JOGO (REGRAS)
 % ==================================================
 exibir_tabuleiro(Tab) :-
     nth1(1, Tab, P1), nth1(2, Tab, P2), nth1(3, Tab, P3),
@@ -63,7 +63,7 @@ jogar(Linha, Coluna, Tab, Jogador, NovoTab) :-
     substituir(Tab, Pos, Jogador, NovoTab).
 
 % ==================================================
-%           INTELIGÊNCIA ARTIFICIAL (MINIMAX)
+%           INTELIGENCIA ARTIFICIAL (MINIMAX)
 % ==================================================
 melhor_jogada(Tab, Jogador, L, C) :-
     findall(V-Lin-Col, (
@@ -151,7 +151,8 @@ ler_jogada(Jogada) :-
     ( var(Termo) -> Jogada = entrada_invalida ; Jogada = Termo ).
 
 % --- PREDICADO PROCESSAR_JOGADA ---
-processar_jogada(((-1), (-1)), _Tab, _Jogador, _NovoTab) :-
+processar_jogada((L, C), _Tab, _Jogador, _NovoTab) :-
+    L == -1, C == -1,
     !,
     write('=================================================='), nl,
     write('  Jogo finalizado pelo jogador. Ate a proxima!'), nl,
@@ -191,6 +192,6 @@ processar_jogada((Linha, Coluna), Tab, Jogador, NovoTab) :-
 processar_jogada(_, Tab, Jogador, NovoTab) :-
     write('--------------------------------------------------'), nl,
     write('  Entrada invalida! Use o formato: Linha, Coluna.'), nl,
-    write('  Exemplo: 2, 3.'), nl,
+    write('  Exemplo: A, B.'), nl,
     write('--------------------------------------------------'), nl,
     rodar(Tab, Jogador, NovoTab).
