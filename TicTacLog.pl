@@ -166,7 +166,7 @@ definir_modo(2) :-
     retractall(modo_jogo(_)), assert(modo_jogo(ia)),
     write('Modo Pessoa vs IA selecionado!'), nl, iniciar_partida.
 definir_modo(_) :-
-    write('Opção invalida. Tente novamente.'), nl, iniciar.
+    write('Escolha invalida. Tente novamente.'), nl, iniciar.
 
 % iniciar_partida/0: carrega tabuleiro vazio e comeca com Jogador 1 (X).
 iniciar_partida :-
