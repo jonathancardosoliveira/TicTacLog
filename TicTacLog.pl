@@ -8,7 +8,7 @@
 % Valores: pessoa (dois jogadores humanos) ou ia (humano vs computador).
 :- dynamic modo_jogo/1.
 
-% tabuleiro/1: estado inicial exigido pelo enunciado — 9 casas vazias (valor 0).
+% tabuleiro/1: estado inicial exigido pelo enunciado, 9 casas vazias (valor 0).
 % A lista representa posicoes 1 a 9, da esquerda para a direita, linha a linha.
 tabuleiro([0,0,0,0,0,0,0,0,0]).
 
