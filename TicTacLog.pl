@@ -144,7 +144,7 @@ min_lista([H|T], Acc, M) :- (H < Acc -> N = H ; N = Acc), min_lista(T, N, M).
 
 %           LOOP PRINCIPAL E PROCESSAMENTO
 
-% iniciar/0: ponto de entrada — exibe menu e le opcao de modo de jogo.
+% iniciar/0: ponto de entrada, exibe menu e le opcao de modo de jogo.
 iniciar :-
     nl,
     write('=================================================='), nl,
@@ -177,7 +177,7 @@ iniciar_partida :-
     tabuleiro(Tab),
     rodar(Tab, 1, _).
 
-% rodar/3: loop principal — exibe tabuleiro e obtem a proxima jogada.
+% rodar/3: loop principal, exibe tabuleiro e obtem a proxima jogada.
 % No modo ia, quando e vez do Jogador 2, a IA joga automaticamente.
 rodar(Tab, Jogador, NovoTab) :-
     exibir_tabuleiro(Tab),
@@ -205,8 +205,8 @@ ler_jogada(Jogada) :-
 
 % processar_jogada/4: trata a jogada em quatro situacoes (ordem das clausulas importa):
 %   1) Saida voluntaria (-1, -1)
-%   2) Jogada valida — vitoria, empate ou proximo turno
-%   3) Jogada invalida — posicao ocupada ou fora do tabuleiro
+%   2) Jogada valida, vitoria, empate ou proximo turno
+%   3) Jogada invalida, posicao ocupada ou fora do tabuleiro
 %   4) Entrada com formato incorreto
 
 % Caso 1: jogador digita -1, -1. para encerrar o jogo
@@ -217,7 +217,7 @@ processar_jogada((L, C), _Tab, _Jogador, _NovoTab) :-
     write('  Jogo finalizado pelo jogador. Ate a proxima!'), nl,
     write('=================================================='), nl, nl.
 
-% Caso 2: jogada valida — atualiza tabuleiro e verifica fim de jogo
+% Caso 2: jogada valida, atualiza tabuleiro e verifica fim de jogo
 processar_jogada((Linha, Coluna), Tab, Jogador, NovoTab) :-
     integer(Linha), integer(Coluna),
     jogar(Linha, Coluna, Tab, Jogador, TabTemp),
