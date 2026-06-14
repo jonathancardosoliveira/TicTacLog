@@ -97,45 +97,60 @@ jogar(Linha, Coluna, Tab, Jogador, NovoTab) :-
 
 %           INTELIGENCIA ARTIFICIAL (MINIMAX)
 
-% melhor_jogada/4: escolhe a melhor jogada (L, C) para a IA usando Minimax.
+% A IA deve analisar o cenário atual e retornar as coordenadas da jogada ideal.
+% Ela usa o algoritmo Minimax para escolher a melhor jogada, garantindo que ela nunca perca. Por ser um algoritmo recursivo, ele simula todas as possibilidades futuras
+
+% melhor_jogada(+Tabuleiro, +Jogador, -Linha, -Coluna): Escolhe a melhor jogada (L, C) para a IA usando Minimax.
 % Avalia todas as casas vazias, calcula pontuacao de cada uma e escolhe a maior.
 melhor_jogada(Tab, Jogador, L, C) :-
+    % findall coleta todas as jogadas possíveis no formato Valor-Linha-Coluna.
+    % Para cada casa vazia, ele simula a jogada e chama o valor_minimax para avaliar o resultado.
     findall(V-Lin-Col, (
         posicao(Lin, Col, Pos),
-        nth1(Pos, Tab, 0),
-        substituir(Tab, Pos, Jogador, NTab),
-        valor_minimax(NTab, Jogador, 0, false, V)
+        nth1(Pos, Tab, 0),                        % Verifica se a posição está vazia
+        substituir(Tab, Pos, Jogador, NTab),      % Simula o novo tabuleiro com a jogada
+        valor_minimax(NTab, Jogador, 0, false, V) % Avalia o valor dessa jogada (começa turno do oponente)
     ), Jogadas),
+    % sort com a opção @>= ordena a lista de forma decrescente com base no Valor (V).
+    % O primeiro elemento da lista ordenada será a jogada com o maior valor possível.
     sort(0, @>=, Jogadas, [_-L-C|_]).  % ordena decrescente e pega a melhor
 
-% valor_minimax/5: calcula pontuacao de um estado para a IA (algoritmo Minimax).
-% Tab = tabuleiro atual, JogIA = jogador da IA, Prof = profundidade da arvore,
-% terceiro arg. = true (maximiza) ou false (minimiza), Val = pontuacao resultante.
-% +10-Prof se IA vence, Prof-10 se oponente vence, 0 se empate.
+% valor_minimax(+Tabuleiro, +JogIA, +Profundidade, +Maximizando, -Valor): Calcula pontuacao de uma jogada para a IA (algoritmo Minimax).
+% Argumentos: Tab = tabuleiro atual, JogIA = jogador da IA, Prof = profundidade da arvore, maximizando = true (maximiza) ou false (minimiza), Val = pontuacao resultante
+% O algoritmo MINMAX assume que a IA quer MAXIMIZAR sua pontuação e o Humano quer MINIMIZAR a pontuação da IA.
 
+% CASOS BASE: Condições de parada da recursão (fim de jogo simulado).
+% Se a IA vence, recebe pontuação positiva. Subtraímos a profundidade para preferir vitórias rápidas.
 valor_minimax(Tab, JogIA, Prof, _, Val) :- vencedor(Tab, JogIA), !, Val is 10 - Prof.
+% Se o oponente vence, recebe pontuação negativa. Somamos a profundidade para preferir derrotas tardias.
 valor_minimax(Tab, JogIA, Prof, _, Val) :- proximo_jogador(JogIA, Op), vencedor(Tab, Op), !, Val is Prof - 10.
+% Se houver empate, a pontuação é neutra (0).
 valor_minimax(Tab, _, _, _, 0) :- empate(Tab), !.
 
-% No da IA (maximizador): simula jogadas da IA e retorna o maior valor possivel
+% CASO RECURSIVO 1: Turno da IA (Maximizador)
+% A IA analisa todas as suas jogadas possíveis e escolhe a que dá o MAIOR valor.
 valor_minimax(Tab, JogIA, Prof, true, Val) :-
     Prof1 is Prof + 1,
     findall(V, (posicao(_,_,P), nth1(P,Tab,0), substituir(Tab,P,JogIA,NT), valor_minimax(NT,JogIA,Prof1,false,V)), Valores),
     max_lista(Valores, Val).
 
-% No do oponente (minimizador): simula jogadas do adversario e retorna o menor valor
+% CASO RECURSIVO 2: Turno do Humano (Minimizador)
+% A IA simula a jogada do humano, assumindo que ele escolherá a jogada que mais prejudica a IA (MENOR valor).
 valor_minimax(Tab, JogIA, Prof, false, Val) :-
     Prof1 is Prof + 1,
     proximo_jogador(JogIA, Op),
     findall(V, (posicao(_,_,P), nth1(P,Tab,0), substituir(Tab,P,Op,NT), valor_minimax(NT,JogIA,Prof1,true,V)), Valores),
     min_lista(Valores, Val).
 
-% max_lista/2: retorna o maior valor de uma lista (auxiliar do Minimax).
+% PREDICADOS AUXILIARES DE LISTA
+% O findall retorna uma lista de valores. Precisamos extrair o maior ou menor deles para que o MiniMax possa 'propagar' a melhor decisão para os níveis superiores da árvore.
+
+% Encontra o valor maximo em uma lista
 max_lista([H|T], Max) :- max_lista(T, H, Max).
 max_lista([], M, M).
 max_lista([H|T], Acc, M) :- (H > Acc -> N = H ; N = Acc), max_lista(T, N, M).
 
-% min_lista/2: retorna o menor valor de uma lista (auxiliar do Minimax).
+% Encontra o valor minimo em uma lista
 min_lista([H|T], Min) :- min_lista(T, H, Min).
 min_lista([], M, M).
 min_lista([H|T], Acc, M) :- (H < Acc -> N = H ; N = Acc), min_lista(T, N, M).
