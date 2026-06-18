@@ -6,9 +6,10 @@
 %           TABULEIRO E CONFIGURACoES INICIAIS
 % ==================================================
 
-% modo_jogo/1 (dinâmico): Armazena o modo de jogo selecionado no inicio da execucao.
-% A diretiva 'dynamic' e necessaria para que o predicado possa ser modificado 
-% Valores possiveis: 'pessoa' (Humano vs Humano) ou 'ia' (Humano vs Computador).
+% modo_jogo/1 (dinamico): Armazena o modo de jogo selecionado no inicio
+% da execucao. A diretiva 'dynamic' e necessaria para que o predicado
+% possa ser modificado Valores possiveis: 'pessoa' (Humano vs Humano) ou
+% 'ia' (Humano vs Computador).
 :- dynamic modo_jogo/1.
 
 % Estado inicial: uma lista com 9 zeros representando as 9 casas vazias do jogo.
@@ -51,12 +52,12 @@ proximo_jogador(2, 1).
 
 
 % ==================================================
-%           LÓGICA DO JOGO (REGRAS)
+%           LOGICA DO JOGO (REGRAS)
 % ==================================================
 
 % exibir_tabuleiro: Desenha o tabuleiro 3x3 no console.
 % Primeiro, extrai os valores de cada posicao da lista (P1 a P9).
-% Depois, converte esses valores nos simbolos visuais ('X', 'O' ou ' ') 
+% Depois, converte esses valores nos simbolos visuais ('X', 'O' ou ' ')
 % e imprime a grade formatada com as coordenadas laterais e superiores.
 exibir_tabuleiro(Tab) :-
     nth1(1, Tab, P1), nth1(2, Tab, P2), nth1(3, Tab, P3),
@@ -112,7 +113,6 @@ jogar(Linha, Coluna, Tab, Jogador, NovoTab) :-
 
 % A IA deve analisar o cenario atual e retornar as coordenadas da jogada ideal.
 % Ela usa o algoritmo Minimax para escolher a melhor jogada, garantindo que ela nunca perca. Por ser um algoritmo recursivo, ele simula todas as possibilidades futuras
-
 % melhor_jogada(+Tabuleiro, +Jogador, -Linha, -Coluna): Escolhe a melhor jogada (L, C) para a IA usando Minimax.
 % Avalia todas as casas vazias, calcula pontuacao de cada uma e escolhe a maior.
 melhor_jogada(Tab, Jogador, L, C) :-
@@ -126,6 +126,7 @@ melhor_jogada(Tab, Jogador, L, C) :-
     ), Jogadas),
     % sort com a opcao @>= ordena a lista de forma decrescente com base no Valor (V).
     % O primeiro elemento da lista ordenada sera a jogada com o maior valor possivel.
+
     sort(0, @>=, Jogadas, [_-L-C|_]).  % ordena decrescente e pega a melhor
 
 % valor_minimax(+Tabuleiro, +JogIA, +Profundidade, +Maximizando, -Valor): Calcula pontuacao de uma jogada para a IA (algoritmo Minimax).
@@ -133,7 +134,8 @@ melhor_jogada(Tab, Jogador, L, C) :-
 % O algoritmo MINMAX assume que a IA quer MAXIMIZAR sua pontuacao e o Humano quer MINIMIZAR a pontuacao da IA.
 
 % CASOS BASE: Condicoes de parada da recursao (fim de jogo simulado).
-% Se a IA vence, recebe pontuacao positiva. Subtraimos a profundidade para preferir vitórias rapidas.
+% Se a IA vence, recebe pontuacao positiva. Subtraimos a profundidade
+% para preferir vitorias rapidas.
 valor_minimax(Tab, JogIA, Prof, _, Val) :- vencedor(Tab, JogIA), !, Val is 10 - Prof.
 % Se o oponente vence, recebe pontuacao negativa. Somamos a profundidade para preferir derrotas tardias.
 valor_minimax(Tab, JogIA, Prof, _, Val) :- proximo_jogador(JogIA, Op), vencedor(Tab, Op), !, Val is Prof - 10.
@@ -237,7 +239,7 @@ ler_jogada(Jogada) :-
     ( var(Termo) -> Jogada = entrada_invalida ; Jogada = Termo ).
 
 
-% --- PROCESSAMENTO E VALIDAcaO DAS JOGADAS ---
+% --- PROCESSAMENTO E VALIDACAO DAS JOGADAS ---
 
 % processar_jogada: Trata a jogada em quatro situacoes distintas:
 %   1) Caso de saida: Saida voluntaria (-1, -1)
