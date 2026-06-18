@@ -3,7 +3,7 @@
 % Representacao do tabuleiro: lista de 9 elementos (0=vazio, 1=X, 2=O)
 
 % ==================================================
-%           TABULEIRO E CONFIGURACoES INICIAIS
+%           TABULEIRO E CONFIGURACOES INICIAIS
 % ==================================================
 
 % modo_jogo/1 (dinamico): Armazena o modo de jogo selecionado no inicio
