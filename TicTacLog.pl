@@ -6,10 +6,7 @@
 %           TABULEIRO E CONFIGURACOES INICIAIS
 % ==================================================
 
-% modo_jogo/1 (dinamico): Armazena o modo de jogo selecionado no inicio
-% da execucao. A diretiva 'dynamic' e necessaria para que o predicado
-% possa ser modificado Valores possiveis: 'pessoa' (Humano vs Humano) ou
-% 'ia' (Humano vs Computador).
+% modo_jogo/1: Armazena o modo de jogo selecionado no inicio: 'pessoa' (Humano vs Humano) ou 'ia' (Humano vs Computador).
 :- dynamic modo_jogo/1.
 
 % Estado inicial: uma lista com 9 zeros representando as 9 casas vazias do jogo.
@@ -73,7 +70,6 @@ exibir_tabuleiro(Tab) :-
 
 % vencedor: Verifica se o jogador informado venceu o jogo.
 % O predicado testa todas as 8 combinacoes possiveis: 3 horizontais, 3 verticais e 2 diagonais.
-% Jog \= 0 evita considerar casas vazias como vitoria.
 vencedor(Tab, Jog) :- Jog \= 0, (
     (nth1(1, Tab, Jog), nth1(2, Tab, Jog), nth1(3, Tab, Jog));  % linha 1
     (nth1(4, Tab, Jog), nth1(5, Tab, Jog), nth1(6, Tab, Jog));  % linha 2
@@ -89,8 +85,7 @@ vencedor(Tab, Jog) :- Jog \= 0, (
 % Ocorre quando nao existem mais casas vazias (0) e nenhum dos jogadores venceu.
 empate(Tab) :- \+ member(0, Tab), \+ vencedor(Tab, 1), \+ vencedor(Tab, 2).
 
-% substituir: Predicado utilitario para atualizar uma lista.
-% Percorre a lista ate a posicao desejada e substitui o valor antigo pelo novo simbolo.
+% substituir: Atualiza o tabuleiro inserindo a peca na casa desejada.
 substituir([_|T], 1, Novo, [Novo|T]).
 substituir([H|T], Pos, Novo, [H|T2]) :- Pos > 1, Pos1 is Pos - 1, substituir(T, Pos1, Novo, T2).
 
@@ -98,8 +93,6 @@ substituir([H|T], Pos, Novo, [H|T2]) :- Pos > 1, Pos1 is Pos - 1, substituir(T, 
 % 1. Converte a Linha/Coluna fornecida no indice linear (1 a 9).
 % 2. Confirma se a casa esta disponivel (contem 0).
 % 3. Gera um novo tabuleiro com a peca do jogador inserida na posicao.
-
-% Falha se a posicao nao existir ou a casa ja estiver ocupada (jogada invalida).
 jogar(Linha, Coluna, Tab, Jogador, NovoTab) :-
     posicao(Linha, Coluna, Pos),            % converte Linha/Coluna em indice
     nth1(Pos, Tab, 0),                      % confirma que a casa esta vazia
@@ -111,61 +104,46 @@ jogar(Linha, Coluna, Tab, Jogador, NovoTab) :-
 %          INTELIGENCIA ARTIFICIAL (MINIMAX)
 % ==================================================
 
-% A IA deve analisar o cenario atual e retornar as coordenadas da jogada ideal.
-% Ela usa o algoritmo Minimax para escolher a melhor jogada, garantindo que ela nunca perca. Por ser um algoritmo recursivo, ele simula todas as possibilidades futuras
-% melhor_jogada(+Tabuleiro, +Jogador, -Linha, -Coluna): Escolhe a melhor jogada (L, C) para a IA usando Minimax.
+% melhor_jogada: Escolhe a melhor jogada (L, C) para a IA usando Minimax.
 % Avalia todas as casas vazias, calcula pontuacao de cada uma e escolhe a maior.
 melhor_jogada(Tab, Jogador, L, C) :-
-    % findall coleta todas as jogadas possiveis no formato Valor-Linha-Coluna.
-    % Para cada casa vazia, ele simula a jogada e chama o valor_minimax para avaliar o resultado.
     findall(V-Lin-Col, (
         posicao(Lin, Col, Pos),
         nth1(Pos, Tab, 0),                        % Verifica se a posicao esta vazia
         substituir(Tab, Pos, Jogador, NTab),      % Simula o novo tabuleiro com a jogada
-        valor_minimax(NTab, Jogador, 0, false, V) % Avalia o valor dessa jogada (comeca turno do oponente)
+        valor_minimax(NTab, Jogador, 0, false, V) % Avalia o valor dessa jogada
     ), Jogadas),
-    % sort com a opcao @>= ordena a lista de forma decrescente com base no Valor (V).
-    % O primeiro elemento da lista ordenada sera a jogada com o maior valor possivel.
+    sort(0, @>=, Jogadas, [_-L-C|_]).  % Escolhe a jogada de maior valor para a IA
 
-    sort(0, @>=, Jogadas, [_-L-C|_]).  % ordena decrescente e pega a melhor
+% valor_minimax: Calcula pontuacao de uma jogada para a IA (algoritmo Minimax).
+% Assume que a IA quer vencer (maior pontuacao) e o Humano quer bloquear a IA (menor pontuacao).
 
-% valor_minimax(+Tabuleiro, +JogIA, +Profundidade, +Maximizando, -Valor): Calcula pontuacao de uma jogada para a IA (algoritmo Minimax).
-% Argumentos: Tab = tabuleiro atual, JogIA = jogador da IA, Prof = profundidade da arvore, maximizando = true (maximiza) ou false (minimiza), Val = pontuacao resultante
-% O algoritmo MINMAX assume que a IA quer MAXIMIZAR sua pontuacao e o Humano quer MINIMIZAR a pontuacao da IA.
-
-% CASOS BASE: Condicoes de parada da recursao (fim de jogo simulado).
-% Se a IA vence, recebe pontuacao positiva. Subtraimos a profundidade
-% para preferir vitorias rapidas.
+% Se a IA vence, recebe pontuacao positiva. Subtraimos a profundidade para preferir vitorias rapidas.
 valor_minimax(Tab, JogIA, Prof, _, Val) :- vencedor(Tab, JogIA), !, Val is 10 - Prof.
 % Se o oponente vence, recebe pontuacao negativa. Somamos a profundidade para preferir derrotas tardias.
 valor_minimax(Tab, JogIA, Prof, _, Val) :- proximo_jogador(JogIA, Op), vencedor(Tab, Op), !, Val is Prof - 10.
 % Se houver empate, a pontuacao e neutra (0).
 valor_minimax(Tab, _, _, _, 0) :- empate(Tab), !.
 
-% CASO RECURSIVO 1: Turno da IA (Maximizador)
-% A IA analisa todas as suas jogadas possiveis e escolhe a que da o MAIOR valor.
+% Turno da IA: analisa todas as suas jogadas possiveis e escolhe a que da o MAIOR valor.
 valor_minimax(Tab, JogIA, Prof, true, Val) :-
     Prof1 is Prof + 1,
     findall(V, (posicao(_,_,P), nth1(P,Tab,0), substituir(Tab,P,JogIA,NT), valor_minimax(NT,JogIA,Prof1,false,V)), Valores),
     max_lista(Valores, Val).
 
-% CASO RECURSIVO 2: Turno do Humano (Minimizador)
-% A IA simula a jogada do humano, assumindo que ele escolhera a jogada que mais prejudica a IA (MENOR valor).
+% Turno do Humano: a IA simula a jogada do humano, assumindo que ele escolhera a jogada de MENOR valor para a IA.
 valor_minimax(Tab, JogIA, Prof, false, Val) :-
     Prof1 is Prof + 1,
     proximo_jogador(JogIA, Op),
     findall(V, (posicao(_,_,P), nth1(P,Tab,0), substituir(Tab,P,Op,NT), valor_minimax(NT,JogIA,Prof1,true,V)), Valores),
     min_lista(Valores, Val).
 
-% PREDICADOS AUXILIARES DE LISTA
-% O findall retorna uma lista de valores. Precisamos extrair o maior ou menor deles para que o MiniMax possa 'propagar' a melhor decisao para os niveis superiores da arvore.
-
-% Encontra o valor maximo em uma lista
+% Encontra o valor maximo em uma lista de pontuacoes
 max_lista([H|T], Max) :- max_lista(T, H, Max).
 max_lista([], M, M).
 max_lista([H|T], Acc, M) :- (H > Acc -> N = H ; N = Acc), max_lista(T, N, M).
 
-% Encontra o valor minimo em uma lista
+% Encontra o valor minimo em uma lista de pontuacoes
 min_lista([H|T], Min) :- min_lista(T, H, Min).
 min_lista([], M, M).
 min_lista([H|T], Acc, M) :- (H < Acc -> N = H ; N = Acc), min_lista(T, N, M).
@@ -189,10 +167,11 @@ iniciar :-
     read(Opcao),
     definir_modo(Opcao).
 
-% definir_modo: configura modo_jogo/1 e inicia a partida.
-% Configura o modo de jogo com base na escolha do usuario.
-% Se escolher 1, define o modo como 'pessoa'. Se 2, define como 'ia'.
-% Qualquer outra entrada reinicia o menu de escolha: retractall apaga modo anterior, ja o assert grava o novo modo escolhido.
+% FUNCAO DO PREDICADO definir_modo/1 NO JOGO DA VELHA:
+% Funciona como o configurador inicial do fluxo. Ele (1) mapeia a escolha numerica do 
+% usuario salvando globalmente se o adversario sera outra 'pessoa' ou a 'ia'; (2) atua como
+% filtro de erro reiniciando o menu se a opcao for invalida; e (3) serve de gatilho para 
+% disparar e iniciar a partida real chamando 'iniciar_partida'.
 definir_modo(1) :-
     retractall(modo_jogo(_)), assert(modo_jogo(pessoa)),
     write('Modo Pessoa vs Pessoa selecionado!'), nl, iniciar_partida.
@@ -231,21 +210,13 @@ rodar(Tab, Jogador, NovoTab) :-
         processar_jogada(Jogada, Tab, Jogador, NovoTab)
     ).
 
-% ler_jogada: Le entrada do teclado com tratamento de erro de sintaxe.
-% catch: evita que o programa trave caso o usuario digite caracteres especiais invalidos.
-% Se read falhar ou retornar variavel nao instanciada, marca como entrada_invalida.
+% ler_jogada: Le entrada do teclado.
 ler_jogada(Jogada) :-
     catch(read(Termo), error(syntax_error(_), _), Termo = entrada_invalida),
     ( var(Termo) -> Jogada = entrada_invalida ; Jogada = Termo ).
 
 
 % --- PROCESSAMENTO E VALIDACAO DAS JOGADAS ---
-
-% processar_jogada: Trata a jogada em quatro situacoes distintas:
-%   1) Caso de saida: Saida voluntaria (-1, -1)
-%   2) Caso de jogada valida: Jogada valida, vitoria, empate ou proximo turno
-%   3) Caso de jogada invalida: Jogada invalida, posicao ocupada ou fora do tabuleiro
-%   4) Caso de entrada invalida generica: Qualquer entrada que nao siga o padrao (Linha, Coluna)
 
 % Caso de saida: O jogador digitou exatamente -1, -1 para encerrar o programa.
 processar_jogada((L, C), _Tab, _Jogador, _NovoTab) :-
@@ -287,7 +258,6 @@ processar_jogada((Linha, Coluna), Tab, Jogador, NovoTab) :-
     write('  ou se a casa ja esta ocupada. Tente novamente.'), nl,
     write('--------------------------------------------------'), nl,
     rodar(Tab, Jogador, NovoTab).
-
 
 % Caso de entrada invalida generica: Qualquer entrada que nao siga o padrao (Linha, Coluna).
 processar_jogada(_, Tab, Jogador, NovoTab) :-
