@@ -28,3 +28,14 @@ Dois jogadores se alternam, inserindo coordenadas linha/coluna para marcar suas 
    " ?- iniciar. "
 
 5. E divirtase jogando, Para sair a qualquer momento, digite -1,-1.
+
+---
+
+## 📖 Contribuidores do Projeto
+
+- Camila Bregalda
+- Emanuel Hennig
+- Gabriel Cosato
+- Guilherme Lago
+- Jonathan Oliveira
+- Vinicius Almada
